@@ -119,6 +119,10 @@ describe 'AppController', ->
     createController()
     assert.isFalse($scope.accountDialog.visible)
 
+  it 'does not show shareDialog by default', ->
+    createController()
+    assert.isFalse($scope.shareDialog.visible)
+
   describe 'applyUpdate', ->
 
     it 'calls annotationMapper.loadAnnotations() upon "create" action', ->
