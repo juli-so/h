@@ -328,6 +328,23 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
             $sanitize textToCheck.substring(startMath, endMath)
       return textToCheck
 
+    scope.checkLength = (text) ->
+      # Check if the text is overflowing.
+      if elem[0].scrollHeight > (elem[0].clientHeight + 10)
+        # Check to see if we've added excerpt markup before.
+        if elem.find('.gradient').length == 0
+          elem.addClass('excerpt')
+          gradient = angular.element '<div class="gradient" ng-hide="vm.editing"></div>'
+          gradient.append angular.element '<span class="more-body"> More...</span>'
+          elem.prepend gradient
+          elem.append angular.element '<span class="less-body" ng-hide="vm.editing"> Less ^</span>'
+          elem.find('.gradient').on 'click', ->
+            $(this).hide()
+            elem.addClass('show-full-body')
+          elem.find('.less-body').on 'click', ->
+            elem.find('.gradient').show()
+            elem.removeClass('show-full-body')
+
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       if !scope.readonly and !scope.preview
@@ -335,6 +352,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
       value = ctrl.$viewValue or ''
       rendered = renderMathAndMarkdown value
       scope.rendered = $sce.trustAsHtml rendered
+      scope.checkLength()
       if mathJaxFallback
         $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
@@ -349,6 +367,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
       scope.preview = false
       output.style.height = ""
       ctrl.$render()
+      $timeout -> scope.checkLength()
       unless readonly then $timeout -> inputEl.focus()
 
   require: '?ngModel'
